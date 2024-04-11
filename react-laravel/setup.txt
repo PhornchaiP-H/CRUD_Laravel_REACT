@@ -1,0 +1,7 @@
+react 
+ - npm i 
+-npm i axios react-bootstrap bootstrap react-dom sweetalert2 
+
+Laravel
+ - php artisan install:api 
+ - php artisan storage:link
