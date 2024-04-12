@@ -13,13 +13,44 @@ function ProductList() {
   }, []);
 
   const fetchProducts = async () => {
-    await axios.get(`http://localhost:8000/api/products`).then(({ data }) => {
-      setProducts(data);
-    });
+    try {
+      const response = await axios.get(`http://localhost:8000/api/products`);
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
   }
 
-  const deleteProduct = async (productId) => { 
-    // Your delete product logic here
+  const deleteProduct = async (id) => {
+    const isConfirm = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning", // Corrected typo from "warnig" to "warning"
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      return result.isConfirmed;
+    });
+
+    if (!isConfirm) {
+      return;
+    }
+
+    await axios.delete(`http://localhost:8000/api/products/${id}`).then(({ data }) => {
+      Swal.fire({
+        icon: 'success',
+        text: data.message 
+      }).then(() => {
+        fetchProducts();
+      });
+    }).catch(({ response: { data } }) => {
+      Swal.fire({
+        text: data.message,
+        icon: 'error',
+      });
+    });
   }
 
   return (
@@ -54,8 +85,8 @@ function ProductList() {
                         <td>
                           <Link to={`/product/edit/${row.id}`} className='btn btn-success me-2'>
                             Edit
-                          </Link> 
-                           <Button variant='danger' onClick={() => deleteProduct(row.id)}>
+                          </Link>
+                          <Button variant='danger' onClick={() => deleteProduct(row.id)}>
                             Delete
                           </Button>
                         </td>
